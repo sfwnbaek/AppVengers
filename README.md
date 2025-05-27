@@ -1,20 +1,32 @@
-<<<<<<< HEAD
-# login_app
+# ✨ login_app — Simple Flutter Login & Expense Tracker
 
-A new Flutter project.
+Welcome to **login_app**, a sleek and beginner-friendly Flutter project designed to help users log in securely and track their expenses effortlessly. Whether you're learning Flutter or building a starter finance app — this project is a great foundation!
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Features
 
-A few resources to get you started if this is your first Flutter project:
+- 🔐 **User Login** with validation  
+- 🧾 **Dashboard** displaying total expenses  
+- ➕ **Add Expenses** with categories  
+- 📊 Clean and intuitive UI  
+- 🖼️ Logo integration (from assets)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
+## 📸 Screenshots
+
+> *(Insert screenshots here if available — e.g., login screen, dashboard, add expense page)*
+
+---
+
+## 🛠️ Getting Started
+
+To run this project locally:
+
+1. **Clone the repo**  
+   ```bash
+   git clone https://github.com/sfwnbaek/AppVengers.git
+
 # AppVengers
 >>>>>>> beb8fe46ae2c0d326300220a91ea79d57f1037c3
