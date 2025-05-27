@@ -1,6 +1,6 @@
-# ✨ login_app — Simple Flutter Login & Expense Tracker
+# ✨ Expense Tracker Application — Simple Flutter Login & Expense Tracker
 
-Welcome to **login_app**, a sleek and beginner-friendly Flutter project designed to help users log in securely and track their expenses effortlessly. Whether you're learning Flutter or building a starter finance app — this project is a great foundation!
+Welcome to **Expense Tracker Application**, a sleek and beginner-friendly Flutter project designed to help users log in securely and track their expenses effortlessly. Whether you're learning Flutter or building a starter finance app — this project is a great foundation!
 
 ---
 
