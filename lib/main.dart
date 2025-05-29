@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 void main() => runApp(MyApp());
 
@@ -15,7 +16,6 @@ class MyApp extends StatelessWidget {
 }
 
 // ------------------ LOGIN SCREEN ------------------
-
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -61,10 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/logo.png', //Logo image path
-              height: 300, // Adjust size as needed
-            ),
+            Image.asset('assets/logo.png', height: 300),
             SizedBox(height: 20),
             TextField(
               controller: _emailController,
@@ -90,7 +87,6 @@ class _LoginScreenState extends State<LoginScreen> {
 }
 
 // ------------------ SIGN UP SCREEN ------------------
-
 class SignUpScreen extends StatefulWidget {
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
@@ -106,12 +102,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     if (email.isNotEmpty && password.isNotEmpty) {
       registeredUser = {'email': email, 'password': password};
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Sign up successful! Please log in.')),
       );
-
-      Navigator.pop(context); // Go back to Login screen
+      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter valid email and password')),
@@ -147,7 +141,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 }
 
 // ------------------ HOME SCREEN ------------------
-
 class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -155,6 +148,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _expenses = [];
+  List<Map<String, dynamic>> _incomes = [];
 
   void _logout(BuildContext context) {
     Navigator.pushReplacement(
@@ -168,17 +162,32 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       MaterialPageRoute(builder: (_) => AddExpenseScreen()),
     );
-
     if (result != null && result is Map<String, dynamic>) {
-      setState(() {
-        _expenses.add(result);
-      });
+      setState(() => _expenses.add(result));
     }
   }
 
-  double get totalExpenses {
-    return _expenses.fold(0.0, (sum, item) => sum + item['amount']);
+  void _navigateToBudget() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => BudgetScreen()),
+    );
+    if (result != null && result is Map<String, dynamic>) {
+      setState(() => _incomes.add(result));
+    }
   }
+
+  void _navigateToReports() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ReportScreen(expenses: _expenses)),
+    );
+  }
+
+  double get totalExpenses =>
+      _expenses.fold(0.0, (sum, item) => sum + item['amount']);
+  double get totalIncome =>
+      _incomes.fold(0.0, (sum, item) => sum + item['amount']);
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ListTile(
                 leading: Icon(Icons.arrow_downward, color: Colors.green),
                 title: Text('Income'),
-                trailing: Text('RM 0.00'),
+                trailing: Text('RM ${totalIncome.toStringAsFixed(2)}'),
               ),
             ),
             Card(
@@ -221,6 +230,16 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.add),
               label: Text('Add Expense'),
               onPressed: _navigateToAddExpense,
+            ),
+            ElevatedButton.icon(
+              icon: Icon(Icons.account_balance_wallet),
+              label: Text('Log Income'),
+              onPressed: _navigateToBudget,
+            ),
+            ElevatedButton.icon(
+              icon: Icon(Icons.bar_chart),
+              label: Text('View Reports'),
+              onPressed: _navigateToReports,
             ),
             SizedBox(height: 20),
             Text('Expense List:', style: TextStyle(fontSize: 18)),
@@ -250,7 +269,6 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 // ------------------ ADD EXPENSE SCREEN ------------------
-
 class AddExpenseScreen extends StatefulWidget {
   @override
   _AddExpenseScreenState createState() => _AddExpenseScreenState();
@@ -259,27 +277,17 @@ class AddExpenseScreen extends StatefulWidget {
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _amountController = TextEditingController();
   String _selectedCategory = 'Food';
-
   final List<String> _categories = ['Food', 'Transport', 'Shopping', 'Other'];
 
   void _saveExpense() {
     final amountText = _amountController.text;
-
-    if (amountText.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Please enter an amount')));
-      return;
-    }
-
     final amount = double.tryParse(amountText);
     if (amount == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Invalid amount format')));
+      ).showSnackBar(SnackBar(content: Text('Invalid amount')));
       return;
     }
-
     Navigator.pop(context, {'amount': amount, 'category': _selectedCategory});
   }
 
@@ -305,17 +313,143 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         (cat) => DropdownMenuItem(value: cat, child: Text(cat)),
                       )
                       .toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedCategory = value!;
-                });
-              },
+              onChanged: (value) => setState(() => _selectedCategory = value!),
               decoration: InputDecoration(labelText: 'Category'),
             ),
             SizedBox(height: 30),
             ElevatedButton(
               onPressed: _saveExpense,
               child: Text('Save Expense'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ------------------ BUDGET SCREEN ------------------
+class BudgetScreen extends StatefulWidget {
+  @override
+  _BudgetScreenState createState() => _BudgetScreenState();
+}
+
+class _BudgetScreenState extends State<BudgetScreen> {
+  final _amountController = TextEditingController();
+  String _selectedSource = 'Salary';
+  final List<String> _sources = ['Salary', 'Business', 'Gift', 'Other'];
+
+  void _saveIncome() {
+    final amount = double.tryParse(_amountController.text);
+    if (amount == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Invalid amount')));
+      return;
+    }
+    Navigator.pop(context, {'amount': amount, 'source': _selectedSource});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Log Income')),
+      body: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(
+              controller: _amountController,
+              decoration: InputDecoration(labelText: 'Amount (RM)'),
+              keyboardType: TextInputType.number,
+            ),
+            SizedBox(height: 20),
+            DropdownButtonFormField<String>(
+              value: _selectedSource,
+              items:
+                  _sources
+                      .map(
+                        (src) => DropdownMenuItem(value: src, child: Text(src)),
+                      )
+                      .toList(),
+              onChanged: (value) => setState(() => _selectedSource = value!),
+              decoration: InputDecoration(labelText: 'Source'),
+            ),
+            SizedBox(height: 30),
+            ElevatedButton(onPressed: _saveIncome, child: Text('Save Income')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ------------------ REPORT SCREEN ------------------
+class ReportScreen extends StatelessWidget {
+  final List<Map<String, dynamic>> expenses;
+
+  ReportScreen({required this.expenses});
+
+  Map<String, double> _calculateTotals() {
+    Map<String, double> totals = {};
+    for (var exp in expenses) {
+      totals[exp['category']] = (totals[exp['category']] ?? 0) + exp['amount'];
+    }
+    return totals;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = _calculateTotals();
+    final categories = data.keys.toList();
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Reports')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text(
+              'Expense Chart',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Expanded(
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  barGroups: List.generate(categories.length, (i) {
+                    return BarChartGroupData(
+                      x: i,
+                      barRods: [
+                        BarChartRodData(
+                          toY: data[categories[i]]!,
+                          width: 20,
+                          color: Colors.blue,
+                        ),
+                      ],
+                    );
+                  }),
+                  titlesData: FlTitlesData(
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: true),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget:
+                            (value, meta) => Padding(
+                              padding: EdgeInsets.only(top: 5),
+                              child: Text(
+                                categories[value.toInt()],
+                                style: TextStyle(fontSize: 10),
+                              ),
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
